@@ -1,0 +1,58 @@
+.App {
+  text-align: center;
+  margin: 20px;
+}
+
+.id-card {
+  display: flex;
+  text-align: left;
+  align-items: center;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin: 10px auto;
+  width: 400px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+  background-color: #fafafa;
+}
+
+.id-card img {
+  width: 120px;
+  height: auto;
+  margin-right: 20px;
+  border-radius: 8px;
+}
+
+.id-card div {
+  text-align: left;
+}
+
+.no-bullets {
+  list-style: none; /* removes the bullet dots */
+  padding: 0;            /* removes the left indent */
+  margin: 0;             /* optional: removes default margin */
+  grid-template-columns: 120px auto;
+}
+
+.random-box {
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  margin: 10px auto;
+  width: 400px;
+  border-radius: 8px;
+  background-color: #fff;
+  display: grid;
+  grid-template-columns: auto 50px; /* label flexible, value fixed */
+  align-items: center;
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.05);
+}
+
+.random-box .label {
+  font-weight: bold;
+}
+
+.random-box .value {
+  text-align: right;
+  font-size: 1.2em;
+  color: #333;
+}
