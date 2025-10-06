@@ -1,0 +1,140 @@
+const mongoose = require("mongoose");
+const supertest = require("supertest");
+const app = require("../app"); // Your Express app
+const api = supertest(app);
+const Property = require("../models/propertyModel");
+
+const properties = [
+  
+      {
+        title: "Florida Condo",
+        type: "Condo",
+        description: "Condo on top of Florida area.",
+        price: 4920,
+        location: {
+            address: "florida street 1",
+            city: "Florida",
+            state: "FL",
+            zipCode: "00230"
+        },
+        squareFeet: 1000,
+        yearBuilt: 2024
+    },
+    {
+        title: "New York Condo",
+        type: "Condo",
+        description: "Condo on top of New York area.",
+        price: 156730,
+        location: {
+            address: "new york street 1",
+            city: "New York",
+            state: "NY",
+            zipCode: "00230"
+        },
+        squareFeet: 1000,
+        yearBuilt: 2024
+    },
+]
+
+describe("Property Controller", () => {
+  beforeEach(async () => {
+    await Property.deleteMany({});
+    await Property.insertMany(properties);
+  });
+
+  afterAll(() => {
+    mongoose.connection.close();
+  });
+
+  // Test GET /api/properties
+  it("should return all properties as JSON when GET /api/properties is called", async () => {
+    const response = await api
+      .get("/api/properties")
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    expect(response.body).toHaveLength(properties.length);
+  });
+
+  // Test POST /api/properties
+  it("should create a new property when POST /api/properties is called", async () => {
+
+            const newProperty = {
+            title: "Miami Condo",
+            type: "Condo",
+            description: "Condo on top of Miami area.",
+            price: 13252,
+            location: {
+                address: "miami street 1",
+                city: "Miami",
+                state: "MI",
+                zipCode: "00230"
+            },
+            squareFeet: 1000,
+            yearBuilt: 2024
+        };
+   
+    await api
+      .post("/api/properties")
+      .send(newProperty)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const propertiesAfterPost = await Property.find({});
+    expect(propertiesAfterPost).toHaveLength(properties.length + 1);
+    const propertyTitles = propertiesAfterPost.map((property) => property.title);
+    expect(propertyTitles).toContain(newProperty.title);
+  });
+
+  // Test GET /api/properties/:id
+  it("should return one property by ID when GET /api/properties/:id is called", async () => {
+    const property = await Property.findOne();
+    await api
+      .get(`/api/properties/${property._id}`)
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+  });
+
+  it("should return 404 for a non-existing property ID", async () => {
+    const nonExistentId = new mongoose.Types.ObjectId();
+    await api.get(`/api/properties/${nonExistentId}`).expect(404);
+  });
+
+  // Test PUT /api/properties/:id
+  it("should update one property with partial data when PUT /api/properties/:id is called", async () => {
+    const property = await Property.findOne();
+    const updatedProperty = {
+      description: "Updated description",
+      type: "Contract",
+    };
+
+    await api
+      .put(`/api/properties/${property._id}`)
+      .send(updatedProperty)
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    const updatedPropertyCheck = await Property.findById(property._id);
+    expect(updatedPropertyCheck.description).toBe(updatedProperty.description);
+    expect(updatedPropertyCheck.type).toBe(updatedProperty.type);
+  });
+
+  it("should return 400 for invalid property ID when PUT /api/properties/:id", async () => {
+    const invalidId = "12345";
+    await api.put(`/api/properties/${invalidId}`).send({}).expect(400);
+  });
+
+  // Test DELETE /api/properties/:id
+  it("should delete one property by ID when DELETE /api/properties/:id is called", async () => {
+    const property = await Property.findOne();
+    await api.delete(`/api/properties/${property._id}`).expect(204);
+
+    const deletedPropertyCheck = await Property.findById(property._id);
+    expect(deletedPropertyCheck).toBeNull();
+  });
+
+  it("should return 400 for invalid property ID when DELETE /api/properties/:id", async () => {
+    const invalidId = "12345";
+    await api.delete(`/api/properties/${invalidId}`).expect(400);
+  });
+});
